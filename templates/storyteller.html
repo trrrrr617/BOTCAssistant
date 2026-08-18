@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}说书人控制台 · 血染钟楼说书人辅助{% endblock %}
+
+{% block body %}
+<div class="page">
+  <header class="page__header">
+    <div>
+      <span class="page__title">说书人控制台 <span class="accent">Storyteller</span></span>
+    </div>
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+      {% if room_code %}
+      <span class="room-code-badge">{{ room_code }}</span>
+      {% endif %}
+      <span id="conn-pill" class="connection-pill">未连接</span>
+    </div>
+  </header>
+
+  <main class="page__main">
+    <div class="container">
+      {% if st_token_invalid %}
+      <div class="card" style="text-align: center; padding: var(--space-7); max-width: 480px; margin: 60px auto;">
+        <h3 style="color: var(--rouge);">🚫 无权访问</h3>
+        <p style="color: var(--ink-soft); margin: var(--space-4) 0;">
+          房间 <strong>{{ room_code }}</strong> 的说书人控制台需要 <strong>ST 令牌</strong>(8 位)。
+          请返回大厅创建房间,系统会在创建后自动跳转。
+        </p>
+        <p style="color: var(--ink-soft); font-size: var(--text-sm); margin: var(--space-4) 0;">
+          如果你是该房间的说书人,请使用创建时收到的完整链接(含 <code>?t=...</code>)。
+        </p>
+        <a href="/" class="btn btn--primary">返回大厅</a>
+      </div>
+      {% elif not room_code %}
+      <div class="card" style="text-align: center; padding: var(--space-7);">
+        <h3>请先在大厅创建房间</h3>
+        <p style="color: var(--ink-soft); margin: var(--space-4) 0;">
+          你还没有创建房间。返回大厅点击「创建房间」即可获得专属房间号。
+        </p>
+        <a href="/" class="btn btn--primary">返回大厅</a>
+      </div>
+      {% else %}
+
+      <!-- 阶段控制条 -->
+      <section class="card fade-in" style="margin-bottom: var(--space-5);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3);">
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--ink-soft); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;">当前阶段</div>
+            <div>
+              <span id="phase-label" class="emblem emblem--fabled">大厅</span>
+              <span style="margin-left: var(--space-3); color: var(--ink-soft);" id="day-night-label">未开始</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;" id="phase-controls">
+            <button id="btn-start-game" class="btn btn--primary">开始游戏</button>
+            <button id="btn-end-day" class="btn" style="display:none;">结束白天 → 夜晚</button>
+            <button id="btn-begin-day" class="btn" style="display:none;">开始白天</button>
+            <button id="btn-begin-nomination" class="btn btn--primary" style="display:none;">🗳 开放提名</button>
+            <button id="btn-end-nomination" class="btn btn--primary" style="display:none;">结束提名阶段 · 结算</button>
+            <button id="btn-end-game" class="btn btn--ghost" style="display:none;">强制结束</button>
+            <button id="btn-restart-game" class="btn btn--primary" style="display:none;">♻ 重新开始</button>
+            <button id="btn-close-room" class="btn btn--danger" style="display:none;">✕ 关闭房间</button>
+          </div>
+        </div>
+
+        <!-- 板子选择(大厅阶段显示) -->
+        <div id="script-bar" style="display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--gold);">
+          <span style="font-size: var(--text-xs); letter-spacing: 0.15em; color: var(--ink-soft); text-transform: uppercase;">板子</span>
+          <span id="script-status" style="flex: 1; color: var(--ink); font-size: var(--text-sm);">尚未录入</span>
+          <button id="btn-manage-scripts" class="btn btn--ghost" title="录入/导入/导出板子">📜 编辑板子</button>
+        </div>
+
+        <!-- 计时器 -->
+        <div id="timer-row" style="display: none; margin-top: var(--space-4); align-items: center; gap: var(--space-3); border-top: 1px solid var(--gold); padding-top: var(--space-4);">
+          <span style="font-size: var(--text-xs); letter-spacing: 0.15em; color: var(--ink-soft); text-transform: uppercase;">聊天剩余</span>
+          <span id="timer-display" style="font-family: var(--font-roman); font-size: var(--text-xl); color: var(--ink); letter-spacing: 0.1em; font-weight: 700;">05:00</span>
+          <button id="btn-set-timer" class="btn btn--ghost" style="margin-left: auto;">设置</button>
+        </div>
+
+        <!-- ST 快速日志(可见范围可点开 modal) -->
+        <div class="st-tools">
+          <input id="st-log-input" type="text" maxlength="200" placeholder="快速记录日志...">
+          <button id="btn-st-add-log" class="btn">记录</button>
+          <button id="btn-st-add-log-advanced" class="btn btn--ghost" title="带可见范围的记录">…</button>
+        </div>
+      </section>
+
+      <!-- 胜负横幅 -->
+      <div id="winner-banner" class="banner" style="display: none; border-color: var(--gold); background: linear-gradient(180deg, var(--ivory) 0%, var(--parchment) 100%); font-family: var(--font-display); font-size: var(--text-lg); text-align: center; padding: var(--space-5);">
+        <span class="banner__icon">◆</span>
+        <span id="winner-text">游戏结束</span>
+      </div>
+
+      <!-- 当前所有提名面板 -->
+      <section id="nominations-card" class="card fade-in" style="display: none; margin-bottom: var(--space-5);">
+        <h3 class="card__title">
+          提名阶段
+          <span id="nominations-count" style="font-size: var(--text-xs); color: var(--gold-deep); letter-spacing: 0.1em; margin-left: var(--space-2);"></span>
+        </h3>
+        <div id="nominations-content"></div>
+      </section>
+
+      <!-- 公共公告 -->
+      <section id="announcement-card" class="banner" style="display: none;">
+        <span class="banner__icon">◆</span>
+        <span id="announcement-text"></span>
+      </section>
+
+      <!-- 白天需注意角色侧栏(白天阶段显示) -->
+      <section id="day-action-card" class="card fade-in" style="margin-bottom: var(--space-5); display: none;">
+        <h3 class="card__title">☀ 白天需注意的角色</h3>
+        <p style="font-size: var(--text-sm); color: var(--ink-soft); margin-bottom: var(--space-3);">以下角色在白天需要被说书人特别留意(由其 ScriptRole.day_action 标记)</p>
+        <ol id="day-action-list" style="margin-left: var(--space-5); color: var(--ink); font-size: var(--text-base); line-height: 1.9;"></ol>
+        <p id="day-action-empty" style="color: var(--ink-soft); font-size: var(--text-sm); display: none;">本板子没有标记白天行动的角色</p>
+      </section>
+
+      <!-- 在场角色备注(只要角色有 notes 且该角色当前在场就显示) -->
+      <section id="role-notes-card" class="card fade-in" style="margin-bottom: var(--space-5); display: none;">
+        <h3 class="card__title">📝 在场角色备注</h3>
+        <p style="font-size: var(--text-sm); color: var(--ink-soft); margin-bottom: var(--space-3);">当前在场角色中,在 ScriptRole.notes 填了备注的会显示在这里</p>
+        <ul id="role-notes-list" style="margin-left: var(--space-5); color: var(--ink); font-size: var(--text-base); line-height: 1.9;"></ul>
+        <p id="role-notes-empty" style="color: var(--ink-soft); font-size: var(--text-sm); display: none;">当前没有带备注的在场角色</p>
+      </section>
+
+      <!-- 传奇角色控制(列出当前板子所有 team=fabled 的角色,ST 可切换在场/离场) -->
+      <section id="fabled-card" class="card fade-in" style="margin-bottom: var(--space-5); display: none;">
+        <h3 class="card__title">📜 传奇角色</h3>
+        <p style="font-size: var(--text-sm); color: var(--ink-soft); margin-bottom: var(--space-3);">
+          传奇角色不会分发给玩家,也不会被抽到。说书人可随时切换它们在场或离场,所有变更会以公开日志通知全体玩家。
+        </p>
+        <ul id="fabled-list" style="display: flex; flex-direction: column; gap: var(--space-3); list-style: none; padding-left: 0;"></ul>
+        <p id="fabled-empty" style="color: var(--ink-soft); font-size: var(--text-sm); display: none;">当前板子没有传奇角色(team=fabled)。在「📜 编辑板子」中添加阵营为「传奇」的角色即可。</p>
+        <p id="fabled-no-script" style="color: var(--ink-soft); font-size: var(--text-sm); display: none;">尚未录入板子,请先在「📜 编辑板子」中录入。</p>
+      </section>
+
+      <!-- 恶魔的伪装(开局后随机抽取的 N 个不在场善良角色,恶魔/爪牙可见) -->
+      <section id="demon-disguises-card" class="card fade-in" style="margin-bottom: var(--space-5); display: none;">
+        <h3 class="card__title">🎭 恶魔的伪装 <span style="font-size: var(--text-xs); color: var(--ink-soft); letter-spacing: 0.15em; margin-left: var(--space-2);" id="demon-disguises-count"></span></h3>
+        <p style="font-size: var(--text-sm); color: var(--ink-soft); margin-bottom: var(--space-3);">
+          开局后随机抽取 N 个不在场的善良阵营角色(镇民 + 外来者),恶魔和爪牙在白天可以假装是其中之一
+          <br>
+          N = 恶魔数 + 爪牙数 + 1
+        </p>
+        <ol id="demon-disguises-list" style="margin-left: var(--space-5); color: var(--ink); font-size: var(--text-base); line-height: 1.9;"></ol>
+        <p id="demon-disguises-empty" style="color: var(--ink-soft); font-size: var(--text-sm); display: none;">尚未生成(开局后会自动生成)</p>
+      </section>
+
+      <!-- 夜晚行动顺序侧栏(首夜/夜晚阶段显示) -->
+      <section id="night-order-card" class="card fade-in" style="margin-bottom: var(--space-5); display: none;">
+        <h3 class="card__title"><span id="night-order-title">🌙 夜晚行动顺序</span></h3>
+        <ol id="night-order-list" style="margin-left: var(--space-5); color: var(--ink); font-size: var(--text-base); line-height: 1.9;"></ol>
+        <p id="night-order-empty" style="color: var(--ink-soft); font-size: var(--text-sm); display: none;">本板子没有设置夜晚行动顺序</p>
+      </section>
+
+      <!-- 玩家列(说书人可见真实身份) -->
+      <section class="card fade-in" style="margin-bottom: var(--space-5); position: relative; z-index: 50;">
+        <h3 class="card__title">玩家列 <span style="font-size: var(--text-xs); color: var(--ink-soft); letter-spacing: 0.15em; margin-left: var(--space-2);" id="player-count-label">0 人</span></h3>
+        <div id="st-player-list" class="player-grid">
+          <p style="color: var(--ink-soft);">等待玩家加入...</p>
+        </div>
+      </section>
+
+      <!-- 活动日志 -->
+      <section class="card fade-in" style="opacity: 0.85;">
+        <h3 class="card__title">活动日志</h3>
+        <div id="event-log" style="max-height: 240px; overflow-y: auto; font-size: var(--text-sm); color: var(--ink-soft); font-family: var(--font-roman); letter-spacing: 0.05em;">
+          <p>暂无活动</p>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  /* ---- 玩家操作菜单 ---- */
+  .player-menu-wrap { position: absolute; top: 6px; right: 6px; z-index: 10; }
+  .player-menu-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--gold); background: var(--parchment); color: var(--gold-deep); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 150ms ease; }
+  .player-menu-btn:hover { background: var(--gold); color: var(--parchment); }
+  .player-menu-dropdown { display: none; position: absolute; top: 30px; right: 0; background: var(--parchment); border: var(--border-hair); border-radius: var(--radius-sm); box-shadow: var(--shadow-deep); min-width: 160px; z-index: 100; padding: 4px 0; }
+  .player-menu-dropdown.is-open { display: block; }
+  .player-menu-dropdown button { display: block; width: 100%; padding: 8px 14px; text-align: left; font-size: var(--text-sm); color: var(--ink); border: none; background: none; cursor: pointer; font-family: var(--font-body); transition: background 120ms ease; }
+  .player-menu-dropdown button:hover { background: var(--gold-glow); }
+  .player-menu-dropdown button.danger { color: var(--rouge); }
+  .player-menu-dropdown button.danger:hover { background: rgba(110,31,35,0.08); }
+  .player-menu-divider { height: 1px; background: var(--gold); margin: 4px 0; opacity: 0.3; }
+  /* ---- 批注标签 ---- */
+  .st-annotations { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; justify-content: center; }
+  .st-tag { font-size: 10px; padding: 1px 6px; border-radius: 2px; letter-spacing: 0.08em; font-family: var(--font-body); }
+  .st-tag--drunk { background: #b08a3e; color: #fff; }
+  .st-tag--poisoned { background: var(--rouge); color: #fff; }
+  .st-tag--note { background: var(--azur); color: var(--ivory); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* ---- 角色备注(ScriptRole.notes,在玩家卡里的小字) — 与手动批注/醉酒/中毒区分:虚线框 + 斜体 + 左侧金色 accent,
+        而不是填充色块样式 ---- */
+  .st-tag--role-note {
+    display: block;
+    margin-top: 6px;
+    padding: 4px 8px;
+    font-size: var(--text-xs);
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px dashed var(--gold);
+    border-left: 3px solid var(--gold-deep);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    letter-spacing: 0.02em;
+  }
+  .st-tag--role-note::before { content: "📜 "; font-style: normal; margin-right: 2px; }
+  /* ---- ST 工具面板 ---- */
+  .st-tools { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--gold); display: flex; gap: var(--space-2); align-items: center; }
+  .st-tools input { flex: 1; padding: 6px 10px; font-size: var(--text-sm); border: var(--border-hair); border-radius: var(--radius-sm); background: var(--ivory); color: var(--ink); font-family: var(--font-body); }
+  .st-tools input:focus { outline: none; border-color: var(--gold-deep); box-shadow: 0 0 0 2px var(--gold-glow); }
+  .st-tools .btn { padding: 6px 14px; font-size: var(--text-xs); white-space: nowrap; }
+  /* ---- 角色选择器 Modal ---- */
+  .st-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,10,8,0.6); z-index: 9990; align-items: center; justify-content: center; }
+  .st-modal-overlay.is-open { display: flex; }
+  .st-modal { background: var(--parchment); border: var(--border-double); border-radius: var(--radius-md); padding: var(--space-5); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow-deep); position: relative; }
+  .st-modal h3 { margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--gold); }
+  .st-modal .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .st-modal .role-option { padding: 8px 12px; border: 1px solid var(--gold); border-radius: var(--radius-sm); cursor: pointer; font-size: var(--text-sm); background: var(--ivory); transition: all 120ms ease; text-align: left; font-family: var(--font-body); }
+  .st-modal .role-option:hover { background: var(--gold); color: var(--parchment); }
+  .st-modal .role-section-title { grid-column: 1 / -1; font-size: var(--text-xs); letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-soft); margin-top: var(--space-3); margin-bottom: 2px; padding-left: 4px; }
+  .st-modal .btn-close { position: absolute; top: 12px; right: 14px; font-size: 18px; cursor: pointer; color: var(--ink-soft); background: none; border: none; }
+  .st-modal .btn-close:hover { color: var(--rouge); }
+  /* ---- 危险按钮 ---- */
+  .btn--danger { background: linear-gradient(180deg, var(--rouge) 0%, #5a1820 100%); color: var(--ivory); border-color: var(--rouge); }
+  .btn--danger:hover { background: linear-gradient(180deg, #c93842 0%, var(--rouge) 100%); color: var(--ivory); }
+  /* ---- 板子表格行拖拽 ---- */
+  #script-roles-tbody tr { transition: background 150ms ease; }
+  #script-roles-tbody tr.dragging { opacity: 0.4; }
+  #script-roles-tbody tr.drag-over { border-top: 2px solid var(--gold-deep); }
+  #script-roles-tbody td.drag-handle {
+    cursor: grab;
+    color: var(--ink-soft);
+    user-select: none;
+    text-align: center;
+    width: 24px;
+    font-size: 16px;
+  }
+  #script-roles-tbody td.drag-handle:hover { color: var(--gold-deep); }
+  #script-roles-tbody tr.dragging td.drag-handle { cursor: grabbing; }
+</style>
+
+<!-- 角色选择器 Modal -->
+<div class="st-modal-overlay" id="role-picker-modal">
+  <div class="st-modal">
+    <button class="btn-close" id="btn-close-role-picker">&times;</button>
+    <h3 id="role-picker-title">变更身份</h3>
+    <div class="role-grid" id="role-picker-grid"></div>
+  </div>
+</div>
+
+<!-- ST 高级日志 modal(可见范围) -->
+<div class="st-modal-overlay" id="st-log-modal">
+  <div class="st-modal" style="max-width: 520px;">
+    <button class="btn-close" id="btn-close-st-log">&times;</button>
+    <h3>添加可见范围日志</h3>
+    <input id="st-log-input-adv" class="input" type="text" maxlength="200" placeholder="输入日志内容..." style="margin-bottom: var(--space-3);">
+    <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-3);">
+      <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+        <input type="radio" name="log-visibility" value="st_only" checked>
+        <span>🔒 仅 ST 可见</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+        <input type="radio" name="log-visibility" value="public">
+        <span>📢 公开给所有人</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+        <input type="radio" name="log-visibility" value="private_to_player">
+        <span>👤→ 仅给特定玩家</span>
+      </label>
+    </div>
+    <select id="st-log-target-select" class="input" style="display: none; margin-bottom: var(--space-3);"></select>
+    <div style="display: flex; gap: var(--space-2);">
+      <button id="btn-st-log-submit" class="btn btn--primary" style="flex:1;">记录</button>
+      <button id="btn-st-log-cancel" class="btn btn--ghost" style="flex:1;">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 板子编辑 modal:可填充表格 + 导入/导出 -->
+<div class="st-modal-overlay" id="script-modal">
+  <div class="st-modal" style="max-width: 920px; max-height: 88vh; display: flex; flex-direction: column;">
+    <button class="btn-close" id="btn-close-script-modal">&times;</button>
+    <h3 style="margin-bottom: var(--space-3);">板子编辑(每次开房录入)</h3>
+
+    <!-- 板子基本信息 + 操作按钮 -->
+    <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-3); flex-wrap: wrap; align-items: center;">
+      <input id="script-edit-id" class="input" type="text" placeholder="板子 ID" style="flex: 0 0 160px;">
+      <input id="script-edit-name" class="input" type="text" placeholder="板子名称" style="flex: 1; min-width: 200px;">
+      <button id="btn-script-import" class="btn btn--ghost" title="粘贴代码导入">📥 导入</button>
+      <button id="btn-script-export" class="btn btn--ghost" title="生成代码">📋 导出</button>
+      <button id="btn-script-clear" class="btn btn--ghost" title="清空当前编辑">🗑</button>
+    </div>
+
+    <!-- 角色表格(可填充) -->
+    <div style="flex: 1; min-height: 0; overflow-y: auto; border: var(--border-hair); border-radius: var(--radius-sm); background: var(--ivory); margin-bottom: var(--space-3);">
+      <table id="script-roles-table" style="width: 100%; border-collapse: collapse; font-size: var(--text-sm);">
+        <thead>
+          <tr style="background: var(--parchment-deep); position: sticky; top: 0; z-index: 1;">
+            <th style="padding: 6px 4px; width: 24px; border-bottom: 1px solid var(--gold);"></th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);">#</th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);">角色 ID</th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);">名称</th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);">阵营</th>
+            <th style="padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--gold);" title="该角色在场时,爪牙数量 +/- 调整(从镇民转化)">爪±</th>
+            <th style="padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--gold);" title="该角色在场时,外来者数量 +/- 调整(从镇民转化)">外±</th>
+            <th style="padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--gold);" title="该角色在场时,恶魔数量 +/- 调整(从镇民转化)">恶±</th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);" title="需同在场的角色 ID(逗号分隔)">要求</th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);" title="分配时该角色会被替换为下列 ID 中随机一个(优先不在场)">替换为</th>
+            <th style="padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--gold);" title="角色备注(ST 控制台会显示在「在场角色备注」)">备注</th>
+            <th style="padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--gold);" title="首夜行动">首夜</th>
+            <th style="padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--gold);" title="后续夜晚行动">后续</th>
+            <th style="padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--gold);" title="该角色白天是否需要被说书人注意">☀ 白天</th>
+            <th style="padding: 6px 4px; border-bottom: 1px solid var(--gold);"></th>
+          </tr>
+        </thead>
+        <tbody id="script-roles-tbody"></tbody>
+      </table>
+    </div>
+
+    <button id="btn-script-add-role" class="btn btn--ghost" style="margin-bottom: var(--space-3);">＋ 添加角色</button>
+
+    <input id="script-edit-notes" class="input" type="text" placeholder="板子备注(可选)" style="margin-bottom: var(--space-3);">
+
+    <!-- 导入代码输入(隐藏在主表单下) -->
+    <div id="script-import-area" style="display: none; margin-bottom: var(--space-3); padding: var(--space-3); background: var(--ivory); border-radius: var(--radius-sm); border: 1px dashed var(--gold-deep);">
+      <label class="field__label" for="script-import-input">粘贴板子代码(BOTC-SCRIPT-V1:...)</label>
+      <textarea id="script-import-input" class="input" rows="3" placeholder="在此粘贴..."></textarea>
+      <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+        <button id="btn-script-import-apply" class="btn btn--primary" style="flex: 1;">解析并填表</button>
+        <button id="btn-script-import-cancel" class="btn btn--ghost" style="flex: 1;">取消</button>
+      </div>
+    </div>
+
+    <!-- 导出代码显示(隐藏) -->
+    <div id="script-export-area" style="display: none; margin-bottom: var(--space-3); padding: var(--space-3); background: var(--ivory); border-radius: var(--radius-sm); border: 1px dashed var(--gold-deep);">
+      <label class="field__label">板子代码(可全选复制)</label>
+      <textarea id="script-export-output" class="input" rows="3" readonly></textarea>
+      <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+        <button id="btn-script-export-copy" class="btn btn--primary" style="flex: 1;">复制到剪贴板</button>
+        <button id="btn-script-export-close" class="btn btn--ghost" style="flex: 1;">关闭</button>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: var(--space-2); border-top: 1px solid var(--gold); padding-top: var(--space-3);">
+      <button id="btn-script-apply" class="btn btn--primary" style="flex: 1;">应用到本房间</button>
+      <button id="btn-script-close" class="btn btn--ghost" style="flex: 1;">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 关闭房间/重开 确认 Modal -->
+<div class="st-modal-overlay" id="confirm-modal">
+  <div class="st-modal" style="max-width: 420px;">
+    <button class="btn-close" id="btn-close-confirm">&times;</button>
+    <h3 id="confirm-title">确认操作</h3>
+    <p id="confirm-text" style="color: var(--ink); margin-bottom: var(--space-4);"></p>
+    <div style="display: flex; gap: var(--space-2);">
+      <button id="btn-confirm-cancel" class="btn btn--ghost" style="flex:1;">取消</button>
+      <button id="btn-confirm-ok" class="btn btn--primary" style="flex:1;">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 批注编辑 Modal(多条) -->
+<div class="st-modal-overlay" id="note-modal">
+  <div class="st-modal" style="max-width: 520px;">
+    <button class="btn-close" id="btn-close-note">&times;</button>
+    <h3 id="note-modal-title">关于该玩家的批注</h3>
+    <p style="color: var(--ink-soft); font-size: var(--text-sm); margin-bottom: var(--space-3);">
+      可添加多条独立批注,每条都可单独编辑或删除
+    </p>
+    <!-- 已存在的批注列表 -->
+    <div id="st-notes-list" style="max-height: 280px; overflow-y: auto; margin-bottom: var(--space-3);"></div>
+    <!-- 添加新批注 -->
+    <div style="border-top: 1px solid var(--gold); padding-top: var(--space-3);">
+      <input id="note-input" class="input" type="text" maxlength="60" placeholder="输入新批注..." style="margin-bottom: var(--space-2);">
+      <button id="btn-add-note" class="btn btn--primary btn--block">＋ 添加批注</button>
+    </div>
+  </div>
+</div>
+<script>
+  window.ROOM_CODE = {{ room_code|tojson if room_code else 'null' }};
+  window.IS_STORYTELLER = true;
+</script>
+<script src="{{ url_for('static', filename='js/pages/storyteller.js') }}"></script>
+{% endblock %}

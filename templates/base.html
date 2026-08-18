@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}血染钟楼 · 说书人辅助{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+
+  <script>
+    // 主题:localStorage 优先,默认 current
+    (function(){
+      try {
+        var t = localStorage.getItem("ui_theme") || "current";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  {% block body %}{% endblock %}
+
+  <div class="corner-mark">proudly presented by tr!&Claude code · bata testing</div>
+  <div id="toast-container"></div>
+
+  <!-- 主题切换器(所有页面可见,固定右上角) -->
+  <div class="theme-switcher" id="theme-switcher">
+    <button data-theme="current">当前</button>
+    <button data-theme="minimal">极简</button>
+    <button data-theme="clean">白底</button>
+    <button data-theme="black-gold">黑金</button>
+    <button data-theme="blood">血染</button>
+  </div>
+  <script>
+    (function(){
+      var sw = document.getElementById("theme-switcher");
+      if (!sw) return;
+      function refresh() {
+        var cur = document.documentElement.getAttribute("data-theme") || "current";
+        sw.querySelectorAll("button").forEach(function(b){
+          b.classList.toggle("is-active", b.getAttribute("data-theme") === cur);
+        });
+      }
+      refresh();
+      sw.addEventListener("click", function(e){
+        var btn = e.target.closest("button[data-theme]");
+        if (!btn) return;
+        var t = btn.getAttribute("data-theme");
+        try { localStorage.setItem("ui_theme", t); } catch (err) {}
+        document.documentElement.setAttribute("data-theme", t);
+        refresh();
+      });
+    })();
+  </script>
+
+  <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/store.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

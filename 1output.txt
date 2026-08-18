@@ -1,0 +1,34 @@
+Eventlet is deprecated. It is currently being maintained in bugfix mode, and
+we strongly recommend against using it for new projects.
+
+If you are already using Eventlet, we recommend migrating to a different
+framework.  For more detail see
+https://eventlet.readthedocs.io/en/latest/asyncio/migration.html
+
+  import eventlet
+1 RLock(s) were not greened, to fix this error make sure you run eventlet.monkey_patch() before importing any other modules.
+No.1                 townsfolk    mod=o0/m0/d0  requires=[]
+No.2                 townsfolk    mod=o0/m0/d0  requires=[]
+No.3                 outsider     mod=o0/m0/d0  requires=[]
+No.4                 townsfolk    mod=o0/m0/d0  requires=[]
+No.5                 minion       mod=o0/m0/d0  requires=[]
+No.6                 townsfolk    mod=o0/m0/d0  requires=[]
+No.7                 minion       mod=o0/m0/d0  requires=[]
+No.8                 minion       mod=o0/m0/d0  requires=[]
+No.9                 demon        mod=o-1/m0/d0  requires=[]
+No.10                demon        mod=o0/m0/d0  requires=[]
+No.11                outsider     mod=o0/m0/d0  requires=[]
+No.12                townsfolk    mod=o0/m0/d0  requires=[]
+No.13                townsfolk    mod=o0/m0/d0  requires=[]
+No.14                townsfolk    mod=o0/m0/d0  requires=['No.3']
+No.15                townsfolk    mod=o0/m0/d0  requires=[]
+No.16                townsfolk    mod=o1/m0/d0  requires=[]
+No.17                townsfolk    mod=o0/m0/d0  requires=[]
+No.18                townsfolk    mod=o0/m0/d0  requires=[]
+No.19                townsfolk    mod=o0/m0/d0  requires=[]
+No.20                townsfolk    mod=o-10/m0/d-1  requires=[]
+No.21                outsider     mod=o0/m0/d0  requires=[]
+No.22                outsider     mod=o0/m0/d0  requires=[]
+No.23                minion       mod=o0/m0/d0  requires=[]
+
+Process finished with exit code 0

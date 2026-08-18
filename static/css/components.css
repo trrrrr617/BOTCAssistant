@@ -1,0 +1,552 @@
+/* =========================================================
+   组件:按钮 / 卡片 / 弹窗 / 玩家列表
+   ========================================================= */
+
+/* ---- 按钮 ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--parchment) 0%, var(--parchment-deep) 100%);
+  border: var(--border-hair);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 200ms ease;
+  user-select: none;
+}
+
+.btn:hover {
+  background: linear-gradient(180deg, var(--ivory) 0%, var(--parchment-deep) 100%);
+  box-shadow: var(--shadow-gold);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: var(--parchment);
+  border-color: var(--gold-deep);
+}
+.btn--primary:hover {
+  background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+  color: var(--parchment);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--gold-deep);
+  color: var(--gold-deep);
+}
+.btn--ghost:hover {
+  background: var(--gold-deep);
+  color: var(--ivory);
+}
+
+.btn--lg {
+  padding: var(--space-4) var(--space-7);
+  font-size: var(--text-md);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ---- 卡片 ---- */
+.card {
+  background: var(--parchment);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--gold-light);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--gold);
+}
+
+/* ---- 输入框 ---- */
+.input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--ink);
+  background: var(--ivory);
+  border: var(--border-hair);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.input:focus {
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+.input--mono {
+  font-family: var(--font-roman);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: var(--text-lg);
+}
+
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.field__label {
+  display: block;
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+}
+
+/* ---- 玩家列表(座位) ---- */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.player-tile {
+  background: var(--ivory);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  position: relative;
+  transition: all 200ms ease;
+}
+
+.player-tile:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+.player-tile__seat {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: var(--font-roman);
+  font-size: var(--text-xs);
+  color: var(--gold-deep);
+  letter-spacing: 0.1em;
+}
+
+.player-tile__name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+  margin: var(--space-2) 0;
+}
+
+.player-tile__status {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.player-tile--storyteller {
+  background: linear-gradient(180deg, var(--ivory) 0%, var(--parchment-deep) 100%);
+  border: var(--border-double);
+}
+
+.player-tile--storyteller::after {
+  content: "ST";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: var(--font-roman);
+  font-size: var(--text-xs);
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+/* ---- 玩家卡片上的操作菜单(三点) ----
+   Portal 化:dropdown 打开时被 JS 移到 document.body 下,用 position:fixed 定位。
+   CSS 只需要管外观,位置完全由 JS 算。
+*/
+.player-menu-wrap {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+.player-menu-btn {
+  background: transparent;
+  border: 1px solid var(--ink-soft);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+  padding: 0;
+}
+.player-menu-btn:hover {
+  background: var(--gold-soft);
+  color: var(--ink);
+  border-color: var(--gold-deep);
+}
+.player-menu-dropdown {
+  /* 默认 display: none,position 由 JS 设 fixed */
+  background: var(--ivory);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-1) 0;
+  min-width: 140px;
+  max-height: 80vh;  /* 防止菜单比视口还高时溢出 */
+  overflow-y: auto;  /* 超 max-height 时内部滚动 */
+  display: none;
+}
+.player-menu-dropdown.is-open {
+  display: block;
+}
+.player-menu-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  transition: background 120ms ease;
+}
+.player-menu-dropdown button:hover {
+  background: var(--gold-soft);
+}
+.player-menu-dropdown button.danger {
+  color: var(--rouge);
+}
+.player-menu-dropdown button.danger:hover {
+  background: var(--rouge-soft);
+  color: var(--ivory);
+}
+.player-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-1) 0;
+}
+
+/* ---- 角色徽记 ---- */
+.emblem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: var(--text-xs);
+  font-family: var(--font-roman);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.emblem--townsfolk { background: var(--azur); color: var(--ivory); }
+.emblem--outsider  { background: #6b5d4f; color: var(--ivory); }
+.emblem--minion    { background: var(--bronze); color: var(--ivory); }
+.emblem--demon     { background: var(--noir); color: var(--rouge); border: 1px solid var(--rouge); }
+.emblem--fabled    { background: var(--gold); color: var(--noir); }
+
+/* ---- 提示横幅 ---- */
+.banner {
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-hair);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--ivory) 0%, var(--parchment-deep) 100%);
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.banner--warning {
+  border-color: var(--rouge);
+  color: var(--rouge);
+}
+
+.banner__icon {
+  font-family: var(--font-roman);
+  font-size: var(--text-lg);
+  color: var(--gold-deep);
+}
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed;
+  bottom: 60px;
+  right: 18px;
+  background: var(--ink);
+  color: var(--ivory);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-deep);
+  font-size: var(--text-sm);
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 300ms ease;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- 连接状态指示 ---- */
+.connection-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.connection-pill::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.connection-pill--offline::before {
+  background: var(--rouge);
+  box-shadow: 0 0 8px var(--rouge);
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* =========================================================
+   投票卡片(提名)
+   ========================================================= */
+
+.vote-card {
+  padding: var(--space-3);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  background: var(--ivory);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+.vote-card--threshold {
+  border-color: var(--gold-deep);
+  border-width: 2px;
+  box-shadow: 0 0 0 2px var(--gold-glow);
+}
+
+.vote-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+.vote-card__sep {
+  color: var(--ink-soft);
+  margin: 0 var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* 投票状态徽章 */
+.vote-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.vote-badge--pending {
+  border: 1px dashed var(--ink-soft);
+  color: var(--ink-soft);
+  background: transparent;
+}
+.vote-badge--yes {
+  background: var(--azur);
+  color: var(--ivory);
+  border: 1px solid var(--azur);
+}
+.vote-badge--no {
+  background: var(--rouge);
+  color: var(--ivory);
+  border: 1px solid var(--rouge);
+}
+
+/* 投票按钮行 */
+.vote-buttons {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+/* 投票进度条(YES 左 + vs + NO 右) */
+.vote-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-2);
+}
+.vote-progress__bar {
+  position: relative;
+  min-width: 24px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-roman);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--ivory);
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1), background 200ms ease;
+  overflow: hidden;
+}
+.vote-progress__bar--yes {
+  background: linear-gradient(90deg, var(--azur) 0%, var(--azur-soft) 100%);
+  border: 1px solid var(--azur);
+  margin-left: auto;
+}
+.vote-progress__bar--yes.is-threshold {
+  background: linear-gradient(90deg, var(--gold-deep) 0%, var(--gold-light) 100%);
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+.vote-progress__bar--no {
+  background: linear-gradient(270deg, var(--rouge) 0%, var(--rouge-soft) 100%);
+  border: 1px solid var(--rouge);
+}
+.vote-progress__num {
+  padding: 0 6px;
+}
+.vote-progress__dead {
+  font-size: 10px;
+  margin-left: 2px;
+  opacity: 0.85;
+}
+.vote-progress__sep {
+  font-family: var(--font-roman);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+.vote-progress__hint {
+  margin-top: 4px;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
+/* 投票按钮 disabled(死玩家额度用完) */
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: auto;  /* 保留 tooltip */
+}
+.btn[disabled]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- 座位交换(Lobby 阶段专用)---- */
+.player-swap-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-deep);
+  background: var(--ivory);
+  color: var(--gold-deep);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+  z-index: 2;
+}
+.player-swap-btn:hover {
+  background: var(--gold-deep);
+  color: var(--ivory);
+  transform: scale(1.1);
+}
+
+/* pending_swap 涉及的玩家卡高亮 */
+.player-tile.is-in-swap {
+  border-color: var(--azur);
+  border-width: 2px;
+  box-shadow: 0 0 0 2px var(--gold-glow);
+}
+
+/* ST 点选交换:第一个被选中 */
+.player-tile.is-swap-selected {
+  border-color: var(--gold-deep);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.player-swap-btn.is-selected {
+  background: var(--gold-deep);
+  color: var(--ivory);
+  transform: scale(1.15);
+}

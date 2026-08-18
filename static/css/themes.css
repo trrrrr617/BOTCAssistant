@@ -1,0 +1,375 @@
+/* =========================================================
+   主题切换 —— 4 种风格通过 [data-theme="..."] 在 <html> 上切
+   默认主题 "current" 不设 data-theme(走 :root 默认)
+   ========================================================= */
+
+/* ---- 主题:极简(白底浅金,轻量留白)---- */
+:root[data-theme="minimal"] {
+  --ink: #2a2a2a;            /* 深灰(代替深咖) */
+  --ink-soft: #6e6e6e;
+  --parchment: #fbfaf7;      /* 几乎白,略带暖 */
+  --parchment-deep: #f4f1e9; /* 极浅米色 */
+  --ivory: #ffffff;          /* 纯白卡片 */
+
+  --gold: #b08a3e;           /* 保留金色,但弱化 */
+  --gold-light: #d4c4a0;     /* 浅金边框 */
+  --gold-deep: #8a6a2a;
+  --gold-glow: rgba(176, 138, 62, 0.18);
+
+  --rouge: #b0303a;          /* 略亮的酒红 */
+  --rouge-soft: #c94454;
+  --azur: #2a5080;
+  --azur-soft: #3a6aa0;
+  --noir: #1a1a1a;
+  --bronze: #6a5a3a;
+
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  --shadow-deep: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --border: #e0d9c5;          /* 极浅金边框 */
+  --bg-image: none;
+}
+
+/* 极简主题:卡片去掉 card::before 的内描边,减少视觉噪音 */
+:root[data-theme="minimal"] .card::before {
+  display: none;
+}
+
+/* 极简主题:卡片 / 标题紧凑化(更小的 padding / 字号) */
+:root[data-theme="minimal"] .card {
+  padding: var(--space-4);
+  border-width: 1px;
+}
+:root[data-theme="minimal"] .card__title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+}
+
+/* 极简主题:玩家列紧凑 */
+:root[data-theme="minimal"] .player-grid {
+  gap: var(--space-2);
+}
+:root[data-theme="minimal"] .player-tile {
+  padding: var(--space-3);
+  background: var(--ivory);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+:root[data-theme="minimal"] .player-tile:hover {
+  box-shadow: var(--shadow-soft);
+  transform: none;
+}
+
+/* 极简主题:投票卡片紧凑 */
+:root[data-theme="minimal"] .vote-card {
+  border-color: var(--border);
+  background: var(--ivory);
+  border-radius: var(--radius-sm);
+}
+:root[data-theme="minimal"] .vote-card--threshold {
+  border-color: var(--gold);
+  border-width: 1px;
+  box-shadow: none;
+}
+:root[data-theme="minimal"] .vote-progress__bar {
+  border-radius: var(--radius-sm);
+}
+
+/* 极简主题:把"在场传奇"嵌入到"我"卡内的 slot 容器 */
+:root[data-theme="minimal"] .role-fabled-inline {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+:root[data-theme="minimal"] .role-fabled-inline li {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--parchment) !important;
+  padding: var(--space-3) !important;
+  list-style: none;
+}
+:root[data-theme="minimal"] .role-fabled-inline li strong {
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+}
+:root[data-theme="minimal"] .role-fabled-inline li span {
+  color: var(--ink-soft) !important;
+}
+
+/* 极简主题:日志区更紧凑 */
+:root[data-theme="minimal"] #player-event-log {
+  max-height: 160px;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+/* 极简主题:私人日志输入框紧凑 */
+:root[data-theme="minimal"] .st-tools input {
+  font-size: var(--text-sm);
+  padding: 6px 10px;
+}
+
+/* 极简主题:连接指示器简化 */
+:root[data-theme="minimal"] .connection-pill {
+  color: var(--ink-soft);
+}
+
+/* 极简主题:Toast 轻量 */
+:root[data-theme="minimal"] .toast {
+  background: var(--ink);
+  color: var(--ivory);
+  border: 0;
+  box-shadow: var(--shadow-card);
+}
+
+/* ---- 主题:简洁白底黑字 ---- */
+:root[data-theme="clean"] {
+  --ink: #000000;
+  --ink-soft: #444444;
+  --parchment: #ffffff;
+  --parchment-deep: #f8f8f8;
+  --ivory: #ffffff;
+  --gold: #888888;
+  --gold-light: #aaaaaa;
+  --gold-deep: #555555;
+  --gold-glow: rgba(0, 0, 0, 0.05);
+  --rouge: #cc0000;
+  --rouge-soft: #ee4444;
+  --azur: #0044aa;
+  --azur-soft: #2266cc;
+  --noir: #222222;
+  --bronze: #666666;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-deep: 0 12px 48px rgba(0, 0, 0, 0.20);
+  --border: #dddddd;
+  --bg-image: none;
+}
+
+/* ---- 主题:黑金(底黑线金)---- */
+:root[data-theme="black-gold"] {
+  --ink: #d4af37;          /* 金色主文字 */
+  --ink-soft: #8a6a2a;
+  --parchment: #0a0a0a;     /* 纯黑底 */
+  --parchment-deep: #141414;
+  --ivory: #1a1a1a;         /* 卡片背景 */
+  --gold: #d4af37;          /* 亮金 */
+  --gold-light: #f0d878;
+  --gold-deep: #8a6a2a;
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --rouge: #b22222;         /* 暗红 */
+  --rouge-soft: #d03030;
+  --azur: #1a3a5e;
+  --azur-soft: #2a5080;
+  --noir: #050505;
+  --bronze: #8a6a2a;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(212, 175, 55, 0.3);
+  --shadow-deep: 0 12px 48px rgba(0, 0, 0, 0.9);
+  --border: #8a6a2a;
+  --bg-image: none;
+}
+
+/* ---- 主题:血染风格(Gemini 图片 + 血红/暗金/黑主调)---- */
+:root[data-theme="blood"] {
+  --ink: #f0e0d0;          /* 羊皮纸字色 */
+  --ink-soft: #b8a090;
+  --parchment: #1a0808;     /* 几乎纯黑 + 红调 */
+  --parchment-deep: #2a0f0f;
+  --ivory: #2a1010;         /* 卡片背景(深红黑) */
+  --gold: #d4af37;          /* 暗金(钟楼色) */
+  --gold-light: #f0c860;
+  --gold-deep: #8a6a2a;
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --rouge: #c41e3a;         /* 血红 */
+  --rouge-soft: #a01828;
+  --azur: #1a3a5e;
+  --azur-soft: #2a4d72;
+  --noir: #0a0404;          /* 极暗黑 */
+  --bronze: #8a4a2a;        /* 锈红铜 */
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(196, 30, 58, 0.4);
+  --shadow-deep: 0 12px 48px rgba(0, 0, 0, 0.95);
+  --border: #5a2a1a;
+  --bg-image: url('/static/img/blood-bg.jpg');
+  --bg-overlay: rgba(15, 5, 5, 0.85);  /* 半透暗黑覆盖层让文字可读 */
+}
+
+/* ---- 背景图应用层(只对血染主题生效,其他主题用 layout.css 里的原 pattern)---- */
+body {
+  min-height: 100vh;  /* 确保 body 至少一屏高,pattern/背景能铺满 */
+  background-color: var(--parchment);
+}
+
+:root[data-theme="blood"] body {
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* 血染主题加 overlay 让文字可读 */
+:root[data-theme="blood"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  pointer-events: none;
+  z-index: 0;
+}
+/* 不再额外给 body 子元素加 position:relative + z-index:1 —— 子元素默认就
+   在 ::before 之上(DOM 顺序),之前的规则反而覆盖了 modal 的 position:fixed
+   让它掉到页面底部。 */
+
+/* ---- 主题切换器 UI(右下角)---- */
+.theme-switcher {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 9999;
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--gold-deep, rgba(255,255,255,0.2));
+}
+.theme-switcher button {
+  background: transparent;
+  border: none;
+  color: var(--ink, #fff);
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 150ms ease;
+}
+.theme-switcher button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.theme-switcher button.is-active {
+  background: var(--gold, #888);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* =========================================================
+   幽冥界面 — 死亡玩家的页面样式
+   通过 <body data-player-status="dead"> 触发
+   各主题单独定义 overlay + tint(避免污染活人体验)
+   ========================================================= */
+
+/* ---- 默认(current 羊皮纸主题)幽冥色 ---- */
+:root:not([data-theme]) body[data-player-status="dead"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(80, 50, 100, 0.05) 0%, rgba(60, 30, 80, 0.22) 100%);
+  z-index: 9000;
+  animation: ghost-breath 6s ease-in-out infinite;
+}
+:root:not([data-theme]) body[data-player-status="dead"] #role-card,
+:root:not([data-theme]) body[data-player-status="dead"] #votes-card,
+:root:not([data-theme]) body[data-player-status="dead"] #fabled-in-play-card {
+  border-color: #6b4a8a;
+  filter: saturate(0.55) brightness(0.92);
+}
+:root:not([data-theme]) body[data-player-status="dead"] #role-card .card__title,
+:root:not([data-theme]) body[data-player-status="dead"] #votes-card .card__title {
+  color: #5a3d6e;
+}
+
+/* ---- clean 主题 ---- */
+:root[data-theme="clean"] body[data-player-status="dead"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(40, 50, 80, 0.04) 0%, rgba(30, 40, 70, 0.14) 100%);
+  z-index: 9000;
+}
+:root[data-theme="clean"] body[data-player-status="dead"] #role-card,
+:root[data-theme="clean"] body[data-player-status="dead"] #votes-card,
+:root[data-theme="clean"] body[data-player-status="dead"] #fabled-in-play-card {
+  border-color: #2a3050;
+  filter: saturate(0.6) brightness(0.92);
+}
+:root[data-theme="clean"] body[data-player-status="dead"] #role-card .card__title,
+:root[data-theme="clean"] body[data-player-status="dead"] #votes-card .card__title {
+  color: #2a3050;
+}
+
+/* ---- black-gold 主题 ---- */
+:root[data-theme="black-gold"] body[data-player-status="dead"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(80, 30, 90, 0.10) 0%, rgba(50, 20, 70, 0.28) 100%);
+  z-index: 9000;
+  animation: ghost-breath 6s ease-in-out infinite;
+}
+:root[data-theme="black-gold"] body[data-player-status="dead"] #role-card,
+:root[data-theme="black-gold"] body[data-player-status="dead"] #votes-card,
+:root[data-theme="black-gold"] body[data-player-status="dead"] #fabled-in-play-card {
+  border-color: #9a5ab5;
+}
+:root[data-theme="black-gold"] body[data-player-status="dead"] #role-card .card__title,
+:root[data-theme="black-gold"] body[data-player-status="dead"] #votes-card .card__title {
+  color: #b886d4;
+}
+
+/* ---- blood 主题 ---- */
+:root[data-theme="blood"] body[data-player-status="dead"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(50, 0, 10, 0.15) 0%, rgba(30, 0, 5, 0.32) 100%);
+  z-index: 9000;
+  animation: ghost-breath 6s ease-in-out infinite;
+}
+:root[data-theme="blood"] body[data-player-status="dead"] #role-card,
+:root[data-theme="blood"] body[data-player-status="dead"] #votes-card,
+:root[data-theme="blood"] body[data-player-status="dead"] #fabled-in-play-card {
+  border-color: #7a2030;
+}
+:root[data-theme="blood"] body[data-player-status="dead"] #role-card .card__title,
+:root[data-theme="blood"] body[data-player-status="dead"] #votes-card .card__title {
+  color: #a83a48;
+}
+
+/* ---- 幽冥呼吸动画(暗紫色 overlay 慢慢呼吸) ---- */
+@keyframes ghost-breath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.78; }
+}
+
+/* ---- 死亡状态下的玩家列(自己):加墓碑标识 ---- */
+body[data-player-status="dead"] #player-list .player-tile.is-self {
+  opacity: 0.7;
+  border-style: dashed;
+  border-color: #6b4a8a;
+}
+body[data-player-status="dead"] #player-list .player-tile.is-self::before {
+  content: "☠";
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 14px;
+  color: #6b4a8a;
+}

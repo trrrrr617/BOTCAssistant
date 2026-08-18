@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}大厅 · 血染钟楼说书人辅助{% endblock %}
+
+{% block body %}
+<div class="page">
+  <main class="page__main">
+    <div class="container container--narrow">
+      <!-- 标题区 -->
+      <header class="lobby__header" style="text-align: center; padding: var(--space-7) 0;">
+        <div class="brand-mark brand-mark--lg" style="margin-bottom: var(--space-3);">BOT&nbsp;·&nbsp;C</div>
+        <h1 class="fade-in" style="font-style: italic; color: var(--ink);">血染钟楼</h1>
+        <p style="color: var(--ink-soft); letter-spacing: 0.2em; text-transform: uppercase; font-size: var(--text-sm); margin-top: var(--space-2);">
+          The Midnight Oasis · 本地说书人辅助
+        </p>
+        <div style="margin-top: var(--space-5); display: flex; justify-content: center; gap: var(--space-3);">
+          <span class="emblem emblem--townsfolk">镇民</span>
+          <span class="emblem emblem--outsider">外来者</span>
+          <span class="emblem emblem--minion">爪牙</span>
+          <span class="emblem emblem--demon">恶魔</span>
+          <span class="emblem emblem--fabled">传奇</span>
+        </div>
+      </header>
+
+      <!-- 两栏:创建 / 加入 -->
+      <div class="lobby__panes" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-6);">
+        <!-- 创建房间 -->
+        <section class="card fade-in">
+          <h3 class="card__title">创建房间</h3>
+          <p style="color: var(--ink-soft); font-size: var(--text-sm); margin-bottom: var(--space-4);">
+            作为说书人开房,玩家用房间号加入
+          </p>
+          <div class="field">
+            <label class="field__label" for="st-name">说书人称呼</label>
+            <input id="st-name" class="input" type="text" maxlength="20" placeholder="说书人">
+          </div>
+          <button id="btn-create" class="btn btn--primary btn--block btn--lg">创建房间</button>
+
+          <!-- 上次房间快捷入口(关闭/退出大厅时显示) -->
+          <div id="last-room-card" style="display: none; margin-top: var(--space-4); padding: var(--space-3); border: 1px dashed var(--gold); border-radius: var(--radius-sm); background: var(--ivory);">
+            <div style="font-size: var(--text-xs); color: var(--ink-soft); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">最近关闭的房间</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);">
+              <span style="font-family: var(--font-roman); font-size: var(--text-md); color: var(--gold-deep); letter-spacing: 0.3em;" id="last-room-code">----</span>
+              <button id="btn-rejoin-st" class="btn btn--ghost" style="padding: 4px 12px; font-size: var(--text-xs);">以 ST 进入</button>
+              <button id="btn-clear-last-room" class="btn btn--ghost" style="padding: 4px 8px; font-size: var(--text-xs);">清除</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 加入房间 -->
+        <section class="card fade-in">
+          <h3 class="card__title">加入房间</h3>
+          <p style="color: var(--ink-soft); font-size: var(--text-sm); margin-bottom: var(--space-4);">
+            输入 4 位房间号与你的名字
+          </p>
+          <div class="field">
+            <label class="field__label" for="join-code">房间号</label>
+            <input id="join-code" class="input input--mono" type="text" maxlength="4" placeholder="ABCD" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="field__label" for="join-name">玩家名</label>
+            <input id="join-name" class="input" type="text" maxlength="20" placeholder="你的名字">
+          </div>
+          <button id="btn-join" class="btn btn--block btn--lg">加入房间</button>
+        </section>
+      </div>
+
+      <!-- 提示 -->
+      <div class="banner fade-in" style="margin-top: var(--space-6);">
+        <span class="banner__icon">◆</span>
+        <div>
+          <strong style="color: var(--ink);">同一局域网内:</strong>
+          玩家可用 <code style="font-family: var(--font-roman); color: var(--gold-deep);">http://&lt;本机IP&gt;:5000</code> 访问
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/lobby.js') }}"></script>
+{% endblock %}

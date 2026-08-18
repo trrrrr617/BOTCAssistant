@@ -1,0 +1,290 @@
+/* =========================================================
+   全局布局与排版
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--ink);
+  background-color: var(--parchment);
+  /* 菱格暗纹背景 */
+  background-image:
+    linear-gradient(45deg, rgba(176, 138, 62, 0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(176, 138, 62, 0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(176, 138, 62, 0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(176, 138, 62, 0.04) 75%);
+  background-size: 32px 32px;
+  background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+
+a {
+  color: var(--gold-deep);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+a:hover { color: var(--gold); }
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ---- 角标 (Proudly Presented) ---- */
+.corner-mark {
+  position: fixed;
+  bottom: 14px;
+  right: 18px;
+  font-family: var(--font-roman);
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  color: var(--gold-deep);
+  text-transform: uppercase;
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
+}
+
+.corner-mark::before {
+  content: "◆";
+  margin-right: 6px;
+  color: var(--gold);
+}
+
+/* ---- 居中容器 ---- */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5);
+}
+
+.container--narrow {
+  max-width: 720px;
+}
+
+/* ---- 页面公共骨架 ---- */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page__header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: var(--border-hair);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--parchment);
+}
+
+.page__title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.page__title .accent {
+  color: var(--gold-deep);
+  margin-left: var(--space-2);
+  font-style: italic;
+}
+
+.page__main {
+  flex: 1;
+}
+
+/* ---- 房间号徽记 ---- */
+.room-code-badge {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-double);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-roman);
+  font-weight: 700;
+  font-size: var(--text-md);
+  letter-spacing: 0.3em;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--parchment) 0%, var(--parchment-deep) 100%);
+}
+
+/* =========================================================
+   移动端响应式 (max-width: 767px)
+   设计原则:
+     - 默认样式完全不动,只在 @media 内部覆盖
+     - 不引入新结构(只改现有元素的尺寸/布局)
+     - 桌面端 (≥ 768px) 完全不受影响
+   ========================================================= */
+@media (max-width: 767px) {
+  .container {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .page__header {
+    padding: var(--space-3) var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .page__title {
+    font-size: var(--text-base);
+    letter-spacing: 0.05em;
+  }
+
+  .page__title .accent {
+    margin-left: var(--space-1);
+  }
+
+  h1 { font-size: var(--text-xl); }
+  h2 { font-size: var(--text-lg); }
+  h3 { font-size: var(--text-md); }
+
+  .card {
+    padding: var(--space-3);
+  }
+  .card__title {
+    font-size: var(--text-md);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+  }
+
+  .room-code-badge {
+    font-size: var(--text-base);
+    padding: var(--space-1) var(--space-3);
+    letter-spacing: 0.2em;
+  }
+
+  /* 玩家列:小屏 1 列(原来是 auto-fill grid) */
+  .player-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .player-tile {
+    padding: var(--space-3);
+  }
+
+  /* 按钮:在小屏稍微紧凑 */
+  .btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+  .btn--lg {
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-base);
+  }
+
+  /* ST 三点菜单:加大点击区域 */
+  .player-menu-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+  .player-menu-wrap {
+    top: 4px;
+    right: 4px;
+  }
+
+  /* 输入框:小屏稍紧凑 */
+  .input {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-base);
+  }
+
+  /* 投票区:按钮全宽 stacked */
+  .vote-buttons {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .vote-buttons .btn {
+    width: 100%;
+    padding: var(--space-3);
+    font-size: var(--text-sm);
+  }
+  .vote-progress {
+    gap: 4px;
+  }
+  .vote-progress__bar {
+    min-width: 20px;
+    height: 24px;
+    font-size: var(--text-xs);
+  }
+  .vote-card {
+    padding: var(--space-3);
+  }
+  .vote-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  /* 横幅:banner 在小屏也紧凑 */
+  .banner {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  /* ST 工具栏(st-tools)在小屏也允许换行 */
+  .st-tools {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .st-tools .btn {
+    flex-shrink: 0;
+  }
+
+  /* 浮窗主题切换器:小屏避免遮挡内容,缩小 */
+  .theme-switcher {
+    bottom: 8px;
+    left: 8px;
+    padding: 3px;
+  }
+  .theme-switcher button {
+    font-size: 11px;
+    padding: 3px 7px;
+  }
+}
+
+/* 超小屏(< 480px):进一步紧凑 */
+@media (max-width: 480px) {
+  .container {
+    padding: var(--space-3) var(--space-2);
+  }
+  .page__title {
+    font-size: var(--text-sm);
+  }
+  .room-code-badge {
+    font-size: var(--text-sm);
+    padding: 2px var(--space-2);
+    letter-spacing: 0.15em;
+  }
+  h1 { font-size: var(--text-lg); }
+  h3 { font-size: var(--text-base); }
+  .card {
+    padding: var(--space-3) var(--space-2);
+  }
+}

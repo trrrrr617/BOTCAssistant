@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}玩家页 · 血染钟楼说书人辅助{% endblock %}
+
+{% block body %}
+<div class="page">
+  <header class="page__header">
+    <div>
+      <span class="page__title">玩家 <span class="accent">Player</span></span>
+    </div>
+    <div style="display: flex; align-items: center; gap: var(--space-4);">
+      {% if room_code %}
+      <span class="room-code-badge">{{ room_code }}</span>
+      {% endif %}
+      <span id="conn-pill" class="connection-pill">未连接</span>
+    </div>
+  </header>
+
+  <main class="page__main">
+    <div class="container container--narrow">
+      {% if not room_exists %}
+      <div class="card fade-in" style="text-align: center; padding: var(--space-7);">
+        <h3>房间 {{ room_code }} 暂未开放</h3>
+        <p style="color: var(--ink-soft); margin: var(--space-4) 0;">
+          请确认房间号是否正确,或等待说书人创建房间。
+        </p>
+        <a href="/" class="btn btn--primary">返回大厅</a>
+      </div>
+      {% elif player_token_invalid %}
+      <div class="card fade-in" style="text-align: center; padding: var(--space-7);">
+        <h3 style="color: var(--rouge);">🚫 无权访问</h3>
+        <p style="color: var(--ink-soft); margin: var(--space-4) 0;">
+          房间 <strong>{{ room_code }}</strong> 的玩家页需要 <strong>玩家令牌</strong>(8 位)。
+        </p>
+        <p style="color: var(--ink-soft); font-size: var(--text-sm); margin: var(--space-4) 0;">
+          如果你是该房间的玩家,请使用加入时收到的完整链接(含 <code>?t=...</code>)。
+        </p>
+        <a href="/" class="btn btn--primary">返回大厅</a>
+      </div>
+      {% else %}
+
+      <!-- 自动加入中 -->
+      <section id="auto-joining-card" class="card fade-in" style="display: none; text-align: center; padding: var(--space-6);">
+        <span class="banner__icon" style="font-size: var(--text-2xl);">◆</span>
+        <h3 style="margin-top: var(--space-3);">正在加入房间 {{ room_code }}...</h3>
+        <p style="color: var(--ink-soft);">以 <span id="auto-join-name" style="color: var(--gold-deep);"></span> 身份</p>
+      </section>
+
+      <!-- 加入表单 -->
+      <section id="join-card" class="card fade-in" style="display: none;">
+        <h3 class="card__title">加入房间 {{ room_code }}</h3>
+        <div class="field">
+          <label class="field__label" for="join-name">你的名字</label>
+          <input id="join-name" class="input" type="text" maxlength="20" placeholder="输入你的名字">
+        </div>
+        <button id="btn-join" class="btn btn--primary btn--block btn--lg">加入</button>
+      </section>
+
+      <!-- 阶段条 -->
+      <section id="phase-banner" class="banner fade-in" style="display: none;">
+        <span class="banner__icon">◆</span>
+        <div>
+          <strong>阶段:</strong>
+          <span id="phase-label" class="emblem emblem--fabled" style="margin-left: var(--space-2);">大厅</span>
+          <span id="day-night-label" style="margin-left: var(--space-3); color: var(--ink-soft);"></span>
+          <span id="timer-label" style="margin-left: var(--space-3); font-family: var(--font-roman); color: var(--gold-deep); display: none;"></span>
+        </div>
+      </section>
+
+      <!-- 胜负横幅 -->
+      <div id="winner-banner" class="banner" style="display: none; border-color: var(--gold); background: linear-gradient(180deg, var(--ivory) 0%, var(--parchment) 100%); font-family: var(--font-display); font-size: var(--text-lg); text-align: center; padding: var(--space-5);">
+        <span class="banner__icon">◆</span>
+        <span id="winner-text">游戏结束</span>
+      </div>
+
+      <!-- 身份卡(只有自己可见) -->
+      <section id="role-card" class="card fade-in" style="display: none;">
+        <h3 class="card__title">你的身份</h3>
+        <div id="role-card-content" style="text-align: center; padding: var(--space-5) 0;">
+          <div id="role-emblem" class="emblem" style="font-size: var(--text-md); padding: var(--space-2) var(--space-4);"></div>
+          <h2 id="role-name" style="margin: var(--space-3) 0; font-style: italic;"></h2>
+          <p id="role-status" style="color: var(--ink-soft); font-size: var(--text-sm); letter-spacing: 0.1em;"></p>
+        </div>
+        <!-- 恶魔的伪装(仅恶魔/爪牙可见,内嵌在身份卡内) -->
+        <div id="demon-disguises-section" style="display: none; border-top: 1px solid var(--gold); padding-top: var(--space-3); margin-top: var(--space-3);">
+          <div style="font-size: var(--text-xs); color: var(--ink-soft); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: var(--space-2);">🎭 恶魔的伪装</div>
+          <p style="font-size: var(--text-xs); color: var(--ink-soft); margin-bottom: var(--space-2);">
+            你可以在白天假装是下面这些善良角色中的任意一个(所有人都共享这一份)
+          </p>
+          <div id="demon-disguises-list" style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;"></div>
+        </div>
+      </section>
+
+      <!-- 在场传奇角色(只要至少一个传奇在场就显示,所有玩家可见) -->
+      <section id="fabled-in-play-card" class="card fade-in" style="margin-top: var(--space-5); display: none;">
+        <h3 class="card__title">📜 在场传奇</h3>
+        <p style="font-size: var(--text-sm); color: var(--ink-soft); margin-bottom: var(--space-3);">
+          说书人在本局引入的传奇角色(只有说书人可以让它们上场或离场)
+        </p>
+        <ul id="fabled-in-play-list" style="display: flex; flex-direction: column; gap: var(--space-3); list-style: none; padding-left: 0;"></ul>
+      </section>
+
+      <!-- 提名/投票区 -->
+      <section id="action-card" class="card fade-in" style="display: none; margin-top: var(--space-5);">
+        <h3 class="card__title" id="action-title">行动</h3>
+        <div id="action-content"></div>
+      </section>
+
+      <!-- 投票区(多提名同时投票) -->
+      <section id="votes-card" class="card fade-in" style="display: none; margin-top: var(--space-5);">
+        <h3 class="card__title">进行中的提名 · 投票</h3>
+        <div id="votes-content"></div>
+      </section>
+
+      <!-- 公共公告 -->
+      <section id="announcement-card" class="banner fade-in" style="display: none; margin-top: var(--space-5);">
+        <span class="banner__icon">◆</span>
+        <span id="announcement-text"></span>
+      </section>
+
+      <!-- 活动日志 -->
+      <section class="card fade-in" style="margin-top: var(--space-5); opacity: 0.85;">
+        <h3 class="card__title">活动日志</h3>
+        <div id="player-event-log" style="max-height: 200px; overflow-y: auto; font-size: var(--text-sm); color: var(--ink-soft); font-family: var(--font-roman); letter-spacing: 0.05em;">
+          <p>暂无活动</p>
+        </div>
+        <div class="st-tools" style="margin-top: var(--space-3); padding-top: var(--space-3);">
+          <input id="player-log-input" type="text" maxlength="200" placeholder="记录私人日志...">
+          <button id="btn-player-add-log" class="btn">记录</button>
+          <button id="btn-player-send-st" class="btn btn--ghost" title="发送日志给说书人">📨 发给说书人</button>
+        </div>
+      </section>
+
+      <!-- 房间玩家列 -->
+      <section class="card fade-in" style="margin-top: var(--space-5);">
+        <h3 class="card__title">在场玩家</h3>
+        <div id="player-list" class="player-grid">
+          <p style="color: var(--ink-soft);">暂无人...</p>
+        </div>
+      </section>
+
+      <div style="margin-top: var(--space-4); text-align: center;">
+        <button id="btn-leave" class="btn btn--ghost" style="display: none;">离开房间</button>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .player-note-btn { font-size: 12px; cursor: pointer; opacity: 0.5; transition: opacity 150ms; background: none; border: none; padding: 0 4px; }
+  .player-note-btn:hover { opacity: 1; }
+  .player-note-tag { font-size: 10px; padding: 1px 6px; border-radius: 2px; background: var(--azur); color: var(--ivory); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; }
+  .player-note-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,10,8,0.6); z-index: 9990; align-items: center; justify-content: center; }
+  .player-note-modal-overlay.is-open { display: flex; }
+  .player-note-modal { background: var(--parchment); border: var(--border-double); border-radius: var(--radius-md); padding: var(--space-5); max-width: 400px; width: 90%; box-shadow: var(--shadow-deep); position: relative; }
+  .player-note-modal h3 { margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--gold); }
+  .player-note-modal .btn-close { position: absolute; top: 12px; right: 14px; font-size: 18px; cursor: pointer; color: var(--ink-soft); background: none; border: none; }
+  .player-note-modal .btn-close:hover { color: var(--rouge); }
+</style>
+
+<!-- 玩家发送给说书人 modal -->
+<div class="player-note-modal-overlay" id="player-send-st-modal">
+  <div class="player-note-modal" style="max-width: 480px;">
+    <button class="btn-close" id="btn-close-send-st">&times;</button>
+    <h3>发送给说书人</h3>
+    <p style="color: var(--ink-soft); font-size: var(--text-sm); margin-bottom: var(--space-3);">
+      仅说书人与你自己可见,适合私下提问或分享思路
+    </p>
+    <textarea id="player-send-st-text" class="input" rows="3" maxlength="200" placeholder="输入要发送给说书人的消息..." style="resize: vertical; margin-bottom: var(--space-3); font-family: var(--font-body);"></textarea>
+    <div style="display: flex; gap: var(--space-2);">
+      <button id="btn-player-send-st-submit" class="btn btn--primary" style="flex:1;">发送</button>
+      <button id="btn-player-send-st-cancel" class="btn btn--ghost" style="flex:1;">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 玩家批注编辑 Modal(多条) -->
+<div class="player-note-modal-overlay" id="player-note-modal">
+  <div class="player-note-modal" style="max-width: 520px;">
+    <button class="btn-close" id="btn-close-player-note">&times;</button>
+    <h3 id="player-note-title">对「<span id="player-note-target-name"></span>」的批注</h3>
+    <p style="color: var(--ink-soft); font-size: var(--text-sm); margin-bottom: var(--space-3);">
+      可添加多条独立批注,每条都可单独编辑或删除(仅自己可见)
+    </p>
+    <!-- 已存在的批注列表 -->
+    <div id="player-notes-list" style="max-height: 280px; overflow-y: auto; margin-bottom: var(--space-3);"></div>
+    <!-- 添加新批注 -->
+    <div style="border-top: 1px solid var(--gold); padding-top: var(--space-3);">
+      <input id="player-note-input" class="input" type="text" maxlength="60" placeholder="输入新批注..." style="margin-bottom: var(--space-2);">
+      <button id="btn-add-player-note" class="btn btn--primary btn--block">＋ 添加批注</button>
+    </div>
+  </div>
+</div>
+<script>
+  window.ROOM_CODE = {{ room_code|tojson if room_code else 'null' }};
+  window.ROOM_EXISTS = {{ 'true' if room_exists else 'false' }};
+  window.IS_STORYTELLER = false;
+</script>
+<script src="{{ url_for('static', filename='js/pages/player.js') }}"></script>
+{% endblock %}

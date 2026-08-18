@@ -1,0 +1,72 @@
+/* =========================================================
+   血染钟楼说书人辅助 — LV 风格 Design Tokens
+   灵感:皮革、铜金、典雅衬线
+   ========================================================= */
+
+:root {
+  /* ---- 基础色 ---- */
+  --ink: #1a1410;          /* 主文字 - 深咖 */
+  --ink-soft: #3a2f25;     /* 弱化文字 */
+  --parchment: #f4ede1;    /* 背景羊皮纸 */
+  --parchment-deep: #e8dec9; /* 卡片背景 */
+  --ivory: #ece3d0;        /* 圣洁之魂象牙白 */
+
+  /* ---- 金色装饰 ---- */
+  --gold: #b08a3e;
+  --gold-light: #c9a557;
+  --gold-deep: #8a6a2a;
+  --gold-glow: rgba(176, 138, 62, 0.35);
+
+  /* ---- 阵营 ---- */
+  --rouge: #6e1f23;        /* 邪恶 - 深酒红 */
+  --rouge-soft: #8a2a2f;
+  --azur: #1a3a5e;         /* 善良 - 深蓝 */
+  --azur-soft: #2a4d72;
+  --noir: #0d0a08;         /* 恶魔 - 暗黑 */
+  --bronze: #5c4631;       /* 爪牙 - 古铜 */
+
+  /* ---- 文字 ---- */
+  --font-display: "Cormorant Garamond", "Songti SC", "STSong", serif;
+  --font-body: "Inter", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-roman: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+
+  /* ---- 间距 ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ---- 圆角 ---- */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+
+  /* ---- 阴影 ---- */
+  --shadow-soft: 0 2px 12px rgba(26, 20, 16, 0.08);
+  --shadow-card: 0 4px 24px rgba(26, 20, 16, 0.12), 0 1px 2px rgba(26, 20, 16, 0.06);
+  --shadow-deep: 0 12px 48px rgba(26, 20, 16, 0.24);
+  --shadow-gold: 0 0 0 1px var(--gold-light), 0 4px 20px var(--gold-glow);
+
+  /* ---- 边框 ---- */
+  --border-hair: 1px solid var(--gold);
+  --border-thin: 1px solid var(--gold-deep);
+  --border-double: 3px double var(--gold);
+  --border: var(--gold-deep);  /* 通用边框(主题可覆写) */
+
+  /* ---- 字号 ---- */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 22px;
+  --text-xl: 32px;
+  --text-2xl: 48px;
+  --text-3xl: 64px;
+}
+
+/* ---- 字体加载(后续接入 Web Font) ---- */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
